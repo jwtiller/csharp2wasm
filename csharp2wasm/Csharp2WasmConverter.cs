@@ -41,7 +41,7 @@ namespace csharp2wasm
         public override void VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
         {
             var name = node.Identifier.Text;
-
+            var operators = GetOperators(node.DescendantNodes().OfType<ReturnStatementSyntax>()).ToList();
             var parameters = node.ParameterList.Parameters
                 .Select(x => Map(x.Type.ToString()))
                 .ToArray();
@@ -63,9 +63,40 @@ namespace csharp2wasm
             for (int i = 0; i < parameters.Length-1; i++)
             {
                 bool trailingSpace = i < parameters.Length-2;
-                AddToSyntaxTree(new I32() { Operator = Operator.Add, TrailingSpace = trailingSpace });
+                Operator? expressionOp = null;
+                if (i < operators.Count)
+                {
+                    expressionOp = operators[i];
+                }
+
+                AddToSyntaxTree(new I32() { Operator = expressionOp, TrailingSpace = trailingSpace });
             }
             AddToSyntaxTree(new RightRoundBracket());
+        }
+
+        private IEnumerable<Operator> GetOperators(IEnumerable<ReturnStatementSyntax> statements)
+        {
+            foreach (var statement in statements)
+            {
+                if (statement.Expression is BinaryExpressionSyntax expression)
+                {
+                    var left = expression.Left.Kind();
+                    if (left == SyntaxKind.AddExpression)
+                        yield return Operator.Add;
+                    if (left == SyntaxKind.SubtractExpression)
+                        yield return Operator.Sub;
+                    if (left == SyntaxKind.MultiplyExpression)
+                        yield return Operator.Mul;
+
+                    yield return expression.OperatorToken.Value switch
+                    {
+                        "+" => Operator.Add,
+                        "-" => Operator.Sub,
+                        "*" => Operator.Mul
+                    };
+                }
+     
+            }
         }
 
         private string Map(string type)

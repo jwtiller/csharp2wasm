@@ -8,7 +8,9 @@ namespace csharp2wasm.syntaxnodes
 {
     public enum Operator
     {
+        None,
         Add,
-        Sub
+        Sub,
+        Mul
     }
 }
