@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
+using csharp2wasm.syntaxnodes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,17 +9,31 @@ namespace csharp2wasm
 {
     public class Csharp2WasmConverter : CSharpSyntaxWalker
     {
-        private readonly StringBuilder output = new();
+        private readonly List<WasmSyntaxNode> _tree = new();
         public string Transpile(string csharp)
         {
-            output.Clear();
-            AddOutputCode("(module");
+            _tree.Clear();
+            AddToSyntaxTree(new LeftRoundBracket());
+            AddToSyntaxTree(new Module());
 
             var tree = CSharpSyntaxTree.ParseText(csharp);
             var root = tree.GetRoot();
             Visit(root);
 
-            AddOutputCode(")");
+            AddToSyntaxTree(new RightRoundBracket());
+
+            return ConvertTreeToString(_tree);
+        }
+
+        private string ConvertTreeToString(List<WasmSyntaxNode> tree)
+        {
+            var output = new StringBuilder();
+            foreach (var node in tree)
+            {
+                string trailingSpace = node.TrailingSpace ? " " : string.Empty;
+                output.Append($"{node.ToString()}{trailingSpace}");
+            }
+
             return output.ToString();
         }
 
@@ -30,35 +45,41 @@ namespace csharp2wasm
             var parameters = node.ParameterList.Parameters
                 .Select(x => Map(x.Type.ToString()))
                 .ToArray();
-            AddOutputCode($" (func (export \"{name}\") (param {string.Join(" ",parameters)})");
+            AddToSyntaxTree(new LeftRoundBracket());
+            AddToSyntaxTree(new Func());
+            AddToSyntaxTree(new LeftRoundBracket());
+            AddToSyntaxTree(new Export() { Value = name });
+            AddToSyntaxTree(new RightRoundBracket() { TrailingSpace = true});
+            AddToSyntaxTree(new Param() { Value = string.Join(" ", parameters) });
 
             var returnType = Map(node.ReturnType.ToString());
-            AddOutputCode($" (result {returnType})");
+            AddToSyntaxTree(new Result() { Value = returnType });
 
             for (int i = 0; i < parameters.Length; i++)
             {
-                AddOutputCode($" local.get {i}");
+                AddToSyntaxTree(new LocalGet() { Value = i.ToString() });
             }
 
             for (int i = 0; i < parameters.Length-1; i++)
             {
-                AddOutputCode(" i32.add");
+                bool trailingSpace = i < parameters.Length-2;
+                AddToSyntaxTree(new I32() { Operator = Operator.Add, TrailingSpace = trailingSpace });
             }
-            AddOutputCode(")");
+            AddToSyntaxTree(new RightRoundBracket());
         }
 
-
-        private readonly List<(string csharpKind, string wasmKind)> _mapping = new()
+        private string Map(string type)
         {
-            ("int", "i32")
-        };
+            return type switch
+            {
+                "int" => "i32",
+                _ => string.Empty
+            };
+        }
 
-        private string Map(string csharpKind) => _mapping.FirstOrDefault(x => x.csharpKind == csharpKind).wasmKind; 
-
-
-        private void AddOutputCode(string code)
+        private void AddToSyntaxTree(WasmSyntaxNode node)
         {
-            output.Append(code);
+            _tree.Add(node);
         }
     }
 }
