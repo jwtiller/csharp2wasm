@@ -40,7 +40,11 @@ namespace csharp2wasm
                 AddOutputCode($" local.get {i}");
             }
 
-            AddOutputCode(" i32.add)");
+            for (int i = 0; i < parameters.Length-1; i++)
+            {
+                AddOutputCode(" i32.add");
+            }
+            AddOutputCode(")");
         }
 
 
