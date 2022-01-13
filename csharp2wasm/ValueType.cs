@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace csharp2wasm.syntaxnodes
+namespace csharp2wasm
 {
-    public record Func : WasmSyntaxNode
+    public enum ValueType
     {
-        public override string ToString() => "func";
+        none,
+        Int32
     }
 }

@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace csharp2wasm.syntaxnodes
+namespace csharp2wasm
 {
-    public record Module : WasmSyntaxNode
+    public enum BinaryOperator
     {
-        public override string ToString() => "module";
+        None,
+        AddInt32,
+        SubInt32,
+        MulInt32
     }
 }
