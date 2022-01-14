@@ -8,10 +8,9 @@ namespace csharp2wasm
 {
     public class Expression
     {
-        public Expression(int index, ValueType type)
+        public Expression(int index, ValueType returnType)
         {
             Index = index;
-            Type = type;
         }
 
         public Expression(BinaryOperator op, Expression left, Expression right)
@@ -24,15 +23,19 @@ namespace csharp2wasm
         public Expression(BinaryOperator op, Expression[] expressions) => MergeExpressions(op, expressions);
 
         public int Index { get; set; }
-        public ValueType Type { get; set; }
         public BinaryOperator? Op { get; set; }
         public Expression Left { get; set; }
         public Expression Right { get; set; }
+        public Expression[] Expressions => new[] { Left, Right };
+
 
         private void MergeExpressions(BinaryOperator op,Expression[] expressions)
         {
             Op = op;
+            Left = new Expression(op, expressions[0], expressions[1]);
+            Right = new Expression(op, null, expressions[2]);
         }
+
 
         public override string ToString()
         {
@@ -43,7 +46,24 @@ namespace csharp2wasm
                 BinaryOperator.MulInt32 => ".mul",
                 _ => string.Empty
             };
-            return $"(i32{op} (get_local $0) (get_local $1)))";
+
+            var subExpressions = Expressions.SelectMany(x => x.Expressions).Count(x => x != null);
+            var result = new StringBuilder();
+            result.Append($"(i32{op}");
+            if (subExpressions > 0)
+            {
+                for (int i = 0; i < subExpressions; i++)
+                {
+                    result.Append($" (get_local ${i})");
+                }
+            }
+            else
+            {
+                result.Append(" (get_local $0) (get_local $1)");
+            }
+
+            result.Append("))");
+            return result.ToString();
         }
 
     }
