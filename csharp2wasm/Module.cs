@@ -34,11 +34,10 @@ namespace csharp2wasm
             return new Expression(op, expressions);
         }
 
-        public Function AddFunction(string name, Signature signature, Expression expression)
+        public void AddFunction(string name, Signature signature, Expression expression)
         {
             var function = new Function(name, signature, expression);
             _function = function;
-            return function;
         }
     }
 }

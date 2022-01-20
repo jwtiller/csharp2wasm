@@ -8,7 +8,6 @@ namespace csharp2wasm
 {
     public enum BinaryOperator
     {
-        None,
         AddInt32,
         SubInt32,
         MulInt32
