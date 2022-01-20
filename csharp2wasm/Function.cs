@@ -28,7 +28,7 @@ namespace csharp2wasm
                 parameters += $" (param ${i} {ValueTypeStringConverter.Convert(Signature.Parameters[i])})";
             }
             var function = $"(type ${Signature.Name}) {parameters.Trim()} (result {ValueTypeStringConverter.Convert(Signature.ReturnType)})";
-            return $"(func ${Name} (; 0 ;) {function} {Expression}";
+            return $"(export \"{Name}\" (func $module/{Name})) (func $module/{Name} (; 0 ;) {function} {Expression}";
         }
     }
 }

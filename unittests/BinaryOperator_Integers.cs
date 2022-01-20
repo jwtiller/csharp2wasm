@@ -23,7 +23,7 @@ namespace unittests
             
             module.AddFunction("mathFunc", signature, add);
             var wat = module.ToWat();
-            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32) (result i32))) (func $mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1))))"),wat);
+            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32) (result i32))) (export \"mathFunc\" (func $module/mathFunc)) (func $module/mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1))))"),wat);
         }
 
         [TestCaseSource(nameof(BinaryOperators))]
@@ -41,7 +41,7 @@ namespace unittests
 
             module.AddFunction("mathFunc", signature, add);
             var wat = module.ToWat();
-            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32 i32) (result i32))) (func $mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1) (get_local $2))))"), wat);
+            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32 i32) (result i32))) (export \"mathFunc\" (func $module/mathFunc)) (func $module/mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1) (get_local $2))))"), wat);
         }
 
         [TestCaseSource(nameof(BinaryOperators))]
@@ -60,7 +60,7 @@ namespace unittests
 
             module.AddFunction("mathFunc", signature, add);
             var wat = module.ToWat();
-            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32 i32 i32) (result i32))) (func $mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1) (get_local $2) (get_local $3))))"), wat);
+            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32 i32 i32) (result i32))) (export \"mathFunc\" (func $module/mathFunc)) (func $module/mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1) (get_local $2) (get_local $3))))"), wat);
         }
 
         [TestCaseSource(nameof(BinaryOperators))]
@@ -79,7 +79,7 @@ namespace unittests
 
             module.AddFunction("mathFunc", signature, add);
             var wat = module.ToWat();
-            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32 i32 i32 i32) (result i32))) (func $mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (param $4 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1) (get_local $2) (get_local $3) (get_local $4))))"), wat);
+            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32 i32 i32 i32) (result i32))) (export \"mathFunc\" (func $module/mathFunc)) (func $module/mathFunc (; 0 ;) (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (param $4 i32) (result i32) ({binaryOperator.ToWatString()} (get_local $0) (get_local $1) (get_local $2) (get_local $3) (get_local $4))))"), wat);
         }
 
         private static BinaryOperator[] BinaryOperators => Enum.GetValues<BinaryOperator>();
