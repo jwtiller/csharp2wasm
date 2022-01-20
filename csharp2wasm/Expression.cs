@@ -26,14 +26,13 @@ namespace csharp2wasm
         public BinaryOperator? Op { get; set; }
         public Expression Left { get; set; }
         public Expression Right { get; set; }
-        public Expression[] Expressions => new[] { Left, Right };
+        public Expression[] Expressions { get; set; }
 
 
         private void MergeExpressions(BinaryOperator op,Expression[] expressions)
         {
             Op = op;
-            Left = new Expression(op, expressions[0], expressions[1]);
-            Right = new Expression(op, null, expressions[2]);
+            Expressions = expressions;
         }
 
 
@@ -47,23 +46,28 @@ namespace csharp2wasm
                 _ => string.Empty
             };
 
-            var subExpressions = Expressions.SelectMany(x => x.Expressions).Count(x => x != null);
             var result = new StringBuilder();
             result.Append($"(i32{op}");
-            if (subExpressions > 0)
+
+            for (int j = 0; j < GetExpressionsSize(); j++)
             {
-                for (int i = 0; i < subExpressions; i++)
-                {
-                    result.Append($" (get_local ${i})");
-                }
-            }
-            else
-            {
-                result.Append(" (get_local $0) (get_local $1)");
+                result.Append($" (get_local ${j})");
             }
 
             result.Append("))");
             return result.ToString();
+        }
+
+
+        private int GetExpressionsSize()
+        {
+            if (Expressions?.Length > 0)
+                return Expressions.Length;
+
+            if (Left != null || Right != null)
+                return 2;
+
+            return 1;
         }
 
     }
