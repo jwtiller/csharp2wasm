@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 using csharp2wasm;
 using NUnit.Framework;
 using Wasmtime;
 using Module = Wasmtime.Module;
 using ValueType = csharp2wasm.ValueType;
 
-namespace unittests
+namespace unittests.BasicOperator.Add
 {
     [TestFixture]
-    public class WasmtimeTests
+    public class AddTwoIntegersTests
     {
         private string wasmTextCode;
         [SetUp]
@@ -28,12 +24,18 @@ namespace unittests
             var add = module.Binary(BinaryOperator.AddInt32, x, y);
 
 
-            module.AddFunction("add", signature, add);
+            module.AddFunction("mathFunc", signature, add);
             wasmTextCode = module.ToWat();
         }
 
         [Test]
-        public void AddThreeAndThree_ShouldReturnSix()
+        public void AssertExpectedWebassemblyText()
+        {
+            Assert.AreEqual(Regex.Unescape($"(module (type $add (func (param i32 i32) (result i32))) (export \"mathFunc\" (func $module/mathFunc)) (func $module/mathFunc (type $add) (param $0 i32) (param $1 i32) (result i32) (i32.add (get_local $0) (get_local $1))))"), wasmTextCode);
+        }
+
+        [Test]
+        public void ShouldReturn_Six()
         {
             using var engine = new Engine();
             using (var module = Module.FromText(engine, "add", wasmTextCode))
@@ -41,7 +43,7 @@ namespace unittests
                 using var linker = new Linker(engine);
                 using var store = new Store(engine);
                 var instance = linker.Instantiate(store, module);
-                var run = instance.GetFunction(store, "add");
+                var run = instance.GetFunction(store, "mathFunc");
                 var result = run?.Invoke(store, 3, 3);
                 Assert.AreEqual(6,result);
             }

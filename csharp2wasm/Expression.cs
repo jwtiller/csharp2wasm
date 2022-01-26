@@ -49,8 +49,13 @@ namespace csharp2wasm
             var result = new StringBuilder();
             result.Append($"(i32{op}");
 
-            for (int j = 0; j < GetExpressionsSize(); j++)
+            int expressions = GetExpressionsSize();
+            for (int j = 0; j < expressions; j++)
             {
+                if (j > 1)
+                {
+                    result.Append($" i32{op}");
+                }
                 result.Append($" (get_local ${j})");
             }
 
