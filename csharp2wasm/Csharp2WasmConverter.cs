@@ -17,7 +17,7 @@ namespace csharp2wasm
             var root = tree.GetRoot();
             Visit(root);
 
-            return _module.ToWat();
+            return _module.ToWebassemblyText();
         }
 
 

@@ -9,7 +9,7 @@ namespace csharp2wasm
     public class Module
     {
         private string wat = "";
-        public string ToWat() => $"(module {_function.Signature} {_function})";
+        public string ToWebassemblyText() => $"(module {_function.Signature} {_function})";
 
         private Function _function;
 

@@ -1,16 +1,12 @@
 ﻿using System.Text.RegularExpressions;
-using csharp2wasm;
 using NUnit.Framework;
-using Wasmtime;
-using Module = Wasmtime.Module;
 using ValueType = csharp2wasm.ValueType;
 
-namespace unittests.BasicOperator.Add
+namespace unittests.BinaryOperatorTests.Add
 {
     [TestFixture]
-    public class AddFiveIntegersTests
+    public class AddFiveIntegersTests : BinaryOperatorTest
     {
-        private string wasmTextCode;
 
         [SetUp]
         public void Setup()
@@ -24,11 +20,11 @@ namespace unittests.BasicOperator.Add
             var x = module.GetLocal(2, ValueType.Int32);
             var y = module.GetLocal(3, ValueType.Int32);
             var z = module.GetLocal(4, ValueType.Int32);
-            var add = module.Binary(BinaryOperator.AddInt32, v,w, x, y, z);
+            var add = module.Binary(csharp2wasm.BinaryOperator.AddInt32, v,w, x, y, z);
 
 
             module.AddFunction("mathFunc", signature, add);
-            wasmTextCode = module.ToWat();
+            WebassemblyText = module.ToWebassemblyText();
         }
 
         [Test]
@@ -37,22 +33,14 @@ namespace unittests.BasicOperator.Add
             Assert.AreEqual(
                 Regex.Unescape(
                     $"(module (type $add (func (param i32 i32 i32 i32 i32) (result i32))) (export \"mathFunc\" (func $module/mathFunc)) (func $module/mathFunc (type $add) (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (param $4 i32) (result i32) (i32.add (get_local $0) (get_local $1) i32.add (get_local $2) i32.add (get_local $3) i32.add (get_local $4))))"),
-                wasmTextCode);
+                WebassemblyText);
         }
 
         [Test]
         public void ShouldReturn_Fiftheen()
         {
-            using var engine = new Engine();
-            using (var module = Module.FromText(engine, "add", wasmTextCode))
-            {
-                using var linker = new Linker(engine);
-                using var store = new Store(engine);
-                var instance = linker.Instantiate(store, module);
-                var run = instance.GetFunction(store, "mathFunc");
-                var result = run?.Invoke(store, 3, 3, 3, 3, 3);
-                Assert.AreEqual(15, result);
-            }
+            var result = ExecuteWasmCode("add", "mathFunc", 3, 3,3,3,3);
+            Assert.AreEqual(15, result);
         }
     }
 }
